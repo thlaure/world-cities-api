@@ -31,15 +31,18 @@ files. Don't restate rule-file content here.
 - changing the PostgreSQL schema
 - changing the external city data source strategy
 - changing `phpstan.neon`
-- `git commit` / `git push` — confirm in the current conversation first
+- `git commit` — confirm in the current conversation first
+- editing `.claude/settings.json` permissions or deleting a tracked directory — confirm that specific action on its own, even when it's part of a broader task the user already approved
 
 ## Never
 
 - put business logic in controllers or framework entrypoints
 - commit directly to `main`, `master`, or `develop`
 
-> Composer installs, commits to protected branches, secret/`.env` writes, and
-> out-of-project writes are blocked by `.claude/settings.json` + hooks — not repeated here.
+> `git push`, commits to protected branches, secret/`.env` writes, and
+> out-of-project writes are blocked at the permission layer (`.claude/settings.json`
+> + hooks), not by asking nicely. If one of these gets denied, don't retry —
+> tell the user to run it directly (`! <command>`) or adjust `settings.json`.
 
 ## Detail (open on demand)
 
