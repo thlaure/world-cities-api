@@ -1,6 +1,6 @@
 api_platform:
-    title: 'INSEE City API'
-    description: 'Symfony/API Platform API exposing French city data from the INSEE API'
+    title: 'World Cities API'
+    description: 'Symfony/API Platform API exposing city data for any country (ISO 3166-1 alpha-2) and address search'
     version: '1.0.0'
 
     enable_swagger_ui: true

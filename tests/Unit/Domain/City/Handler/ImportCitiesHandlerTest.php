@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Domain\City\Handler;
 use App\Application\City\Handler\ImportCitiesHandler;
 use App\Domain\City\Exception\CityDataProviderException;
 use App\Domain\City\Model\City;
-use App\Domain\City\Model\CountryCode;
 use App\Domain\City\Port\CityDataProviderInterface;
 use App\Domain\City\Port\CityRepositoryInterface;
+use App\Domain\Shared\Model\CountryCode;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\UI\ApiResource;
 
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use App\Entity\City;
 use App\UI\ApiResource\CityResource;
 use PHPUnit\Framework\TestCase;

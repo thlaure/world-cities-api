@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Behat;
 
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use App\Entity\City;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;

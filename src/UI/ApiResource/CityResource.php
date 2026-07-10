@@ -13,7 +13,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\QueryParameter;
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use App\Entity\City;
 use App\Infrastructure\Http\Provider\CityCollectionProvider;
 use App\Infrastructure\Http\Provider\CityItemProvider;

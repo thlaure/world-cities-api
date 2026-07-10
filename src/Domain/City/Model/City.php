@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\City\Model;
 
+use App\Domain\Shared\Model\CountryCode;
+
 final readonly class City
 {
     public function __construct(

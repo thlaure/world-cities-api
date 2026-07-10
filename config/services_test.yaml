@@ -11,3 +11,13 @@ services:
     App\Tests\Behat\CityFixtureContext:
         arguments:
             $entityManager: '@doctrine.orm.entity_manager'
+
+    App\Tests\Behat\AddressFixtureContext:
+        arguments:
+            $addressProvider: '@App\Tests\Fake\FakeAddressProvider'
+
+    App\Tests\Fake\FakeAddressProvider:
+        public: true
+
+    App\Domain\Address\Port\AddressProviderInterface:
+        alias: App\Tests\Fake\FakeAddressProvider

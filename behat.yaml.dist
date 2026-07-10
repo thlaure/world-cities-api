@@ -6,6 +6,7 @@ default:
       contexts:
         - App\Tests\Behat\ApiContext
         - App\Tests\Behat\CityFixtureContext
+        - App\Tests\Behat\AddressFixtureContext
 
   extensions:
     FriendsOfBehat\SymfonyExtension:

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Persistence;
 
 use App\Domain\City\Model\City;
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use App\Entity\City as CityEntity;
 use App\Infrastructure\Persistence\DoctrineCityRepository;
 use App\Tests\Integration\DatabaseTestCase;

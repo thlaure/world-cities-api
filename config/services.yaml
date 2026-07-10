@@ -31,3 +31,10 @@ services:
     App\Infrastructure\External\GeoApiClient:
         arguments:
             $baseUrl: '%env(INSEE_API_BASE_URL)%'
+
+    App\Domain\Address\Port\AddressProviderInterface:
+        alias: App\Infrastructure\External\PhotonClient
+
+    App\Infrastructure\External\PhotonClient:
+        arguments:
+            $baseUrl: '%env(PHOTON_BASE_URL)%'
