@@ -21,16 +21,28 @@ final readonly class ImportCitiesHandler
     ) {
     }
 
-    public function __invoke(): ImportResultDTO
+    /**
+     * @param callable(string): void|null        $onProviderStarted called once per provider with its short class name
+     * @param callable(int, int, int): void|null $onCityImported    called after each city with (created, updated, totalProcessed)
+     */
+    public function __invoke(?callable $onProviderStarted = null, ?callable $onCityImported = null): ImportResultDTO
     {
         $created = 0;
         $updated = 0;
         $batchCount = 0;
 
         foreach ($this->dataProviders as $dataProvider) {
+            if (null !== $onProviderStarted) {
+                $onProviderStarted($this->resolveProviderLabel($dataProvider));
+            }
+
             foreach ($dataProvider->fetchAllCities() as $city) {
                 $isNew = $this->cityRepository->save($city);
                 $isNew ? ++$created : ++$updated;
+
+                if (null !== $onCityImported) {
+                    $onCityImported($created, $updated, $created + $updated);
+                }
 
                 if (0 === ++$batchCount % self::FLUSH_BATCH_SIZE) {
                     $this->cityRepository->flush();
@@ -45,5 +57,12 @@ final readonly class ImportCitiesHandler
             updated: $updated,
             totalProcessed: $created + $updated,
         );
+    }
+
+    private function resolveProviderLabel(CityDataProviderInterface $dataProvider): string
+    {
+        $className = $dataProvider::class;
+
+        return substr($className, strrpos($className, '\\') + 1);
     }
 }

@@ -152,6 +152,37 @@ final class ImportCitiesHandlerTest extends TestCase
         $this->assertSame(3, $result->totalProcessed);
     }
 
+    public function testInvokeCallsProgressCallbacksWithExpectedArguments(): void
+    {
+        $cities = [
+            $this->makeCity('75056', 'Paris', '75', '11', '75001'),
+            $this->makeCity('69123', 'Lyon', '69', '84', '69001'),
+        ];
+
+        $this->dataProvider->expects($this->once())
+            ->method('fetchAllCities')
+            ->willReturn($cities);
+
+        $this->cityRepository->expects($this->exactly(2))
+            ->method('save')
+            ->willReturnOnConsecutiveCalls(true, false);
+
+        $providerLabels = [];
+        $cityProgress = [];
+
+        ($this->handler)(
+            onProviderStarted: function (string $providerLabel) use (&$providerLabels): void {
+                $providerLabels[] = $providerLabel;
+            },
+            onCityImported: function (int $created, int $updated, int $totalProcessed) use (&$cityProgress): void {
+                $cityProgress[] = [$created, $updated, $totalProcessed];
+            },
+        );
+
+        $this->assertCount(1, $providerLabels);
+        $this->assertSame([[1, 0, 1], [1, 1, 2]], $cityProgress);
+    }
+
     private function makeCity(
         string $localCode,
         string $name,
