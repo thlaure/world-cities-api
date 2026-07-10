@@ -1,0 +1,23 @@
+# Auto-merged by plain `docker compose ...` commands (no -f flag needed) — this is
+# what every `make` target and CI already run, so local dev behavior is unchanged.
+# Production deploys explicitly pass `-f docker-compose.yml -f docker-compose.prod.yml`,
+# which does NOT pick up this file, so none of this dev convenience leaks into prod.
+services:
+  app:
+    ports:
+      - "8001:80"
+      - "4444:443"
+      - "4444:443/udp"
+    volumes:
+      - .:/app:cached
+      - ./docker/frankenphp/php.dev.ini:/usr/local/etc/php/conf.d/app.ini:ro
+      - ./docker/frankenphp/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
+      - ./docker/frankenphp/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+
+  database:
+    ports:
+      - "5433:5432"
+
+  photon:
+    ports:
+      - "2322:2322"

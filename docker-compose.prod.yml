@@ -1,0 +1,17 @@
+# Layer explicitly on top of docker-compose.yml for a real deployment:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Passing -f disables Compose's automatic docker-compose.override.yml pickup, so none
+# of the dev-only ports/bind-mounts defined there apply here.
+services:
+  app:
+    build:
+      dockerfile: docker/frankenphp/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - APP_ENV=prod
+      - APP_DEBUG=0
+      # Fails loudly instead of silently falling back to the base file's dev default.
+      - APP_SECRET=${APP_SECRET:?APP_SECRET must be set for a production deployment}
