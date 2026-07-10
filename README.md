@@ -327,9 +327,17 @@ This repo documents local Docker Compose development in detail; it does **not** 
 
 Numbers are from `docker stats` on the France+Monaco index configuration. RAM for `photon` scales with index size — a larger [Photon index](#extending-address-search-coverage) (continental/planet-wide) needs proportionally more.
 
-### Photon must not be publicly reachable
+### Production Docker Compose
 
-`docker-compose.yml`'s `ports: ["2322:2322"]` on the `photon` service is a **local dev convenience** (lets you `curl localhost:2322` directly to debug it). Photon has no authentication of its own. In any real deployment, do not publish that port externally — `PhotonClient` only needs to reach it over the internal Docker network (`http://photon:2322`, matching `PHOTON_BASE_URL`'s default); nothing external should.
+`docker-compose.yml` (base) declares no host ports for `database`/`photon` and no dev bind-mounts for `app`. Those dev conveniences (source bind-mount, xdebug, `8001`/`4444`/`5433`/`2322` published ports) live in `docker-compose.override.yml`, which plain `docker compose ...` picks up automatically — so `make up` and CI are unaffected.
+
+For a real deployment, layer `docker-compose.prod.yml` explicitly instead, which switches `app` to the production Dockerfile, publishes only `80`/`443`, sets `APP_ENV=prod`/`APP_DEBUG=0`, and requires `APP_SECRET` to be set (fails loudly otherwise):
+
+```bash
+APP_SECRET=<your-secret> docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+Passing `-f` disables Compose's automatic `docker-compose.override.yml` pickup, so none of the dev-only ports/bind-mounts apply. This is also why `database`/`photon` end up unreachable from outside the Docker network in production — neither file publishes a host port for them, and `photon` has no authentication of its own, so it must never be exposed directly.
 
 ### Database migrations
 

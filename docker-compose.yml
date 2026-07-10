@@ -5,17 +5,14 @@ services:
       dockerfile: docker/frankenphp/Dockerfile.dev
     container_name: insee-city-api-app
     restart: unless-stopped
-    ports:
-      - "8001:80"
-      - "4444:443"
-      - "4444:443/udp"
+    # Dev-only ports/bind-mounts (source code, xdebug, dev php.ini/Caddyfile) live in
+    # docker-compose.override.yml, auto-merged by plain `docker compose` commands so
+    # `make up`/CI behavior is unchanged. Production layers docker-compose.prod.yml
+    # instead (explicit -f, so the override file is not picked up).
     volumes:
-      - .:/app:cached
-      - ./docker/frankenphp/php.dev.ini:/usr/local/etc/php/conf.d/app.ini:ro
-      - ./docker/frankenphp/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro
-      - ./docker/frankenphp/Caddyfile.dev:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    mem_limit: 512m
     environment:
       - APP_ENV=${APP_ENV:-dev}
       - APP_DEBUG=${APP_DEBUG:-1}
@@ -39,8 +36,9 @@ services:
     image: postgres:16-alpine
     container_name: insee-city-api-postgres
     restart: unless-stopped
-    ports:
-      - "5433:5432"
+    # No host port publish here by design — only `app` needs to reach this, over the
+    # internal network. docker-compose.override.yml re-adds 5433:5432 for local dev
+    # tools (psql from the host); production never gets that back.
     environment:
       POSTGRES_USER: insee
       POSTGRES_PASSWORD: insee
@@ -53,6 +51,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    mem_limit: 512m
     networks:
       - insee-city-api
 
@@ -62,8 +61,9 @@ services:
       dockerfile: docker/photon/Dockerfile
     container_name: insee-city-api-photon
     restart: unless-stopped
-    ports:
-      - "2322:2322"
+    # No host port publish here by design — Photon has no auth of its own, and only
+    # `app` needs to reach it, over the internal network. docker-compose.override.yml
+    # re-adds 2322:2322 for local debugging; production never gets that back.
     volumes:
       - photon_data:/photon/photon_data
     healthcheck:
@@ -72,6 +72,7 @@ services:
       timeout: 10s
       retries: 20
       start_period: 15m
+    mem_limit: 2g
     networks:
       - insee-city-api
 
