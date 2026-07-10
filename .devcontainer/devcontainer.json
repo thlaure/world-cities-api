@@ -1,5 +1,5 @@
 {
-    "name": "INSEE City API",
+    "name": "World Cities API",
 
     // Standalone devcontainer with its own Docker daemon (Docker-in-Docker).
     // This avoids "port already allocated" errors that occur when sharing the
@@ -25,7 +25,7 @@
         "5433": { "label": "PostgreSQL",       "onAutoForward": "silent" }
     },
 
-    "workspaceFolder": "/workspaces/insee-city-api",
+    "workspaceFolder": "/workspaces/world-cities-api",
 
     // Build and start the full stack after the devcontainer is created.
     "postCreateCommand": "make install",

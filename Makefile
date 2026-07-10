@@ -9,11 +9,11 @@ YELLOW := \033[0;33m
 CYAN   := \033[0;36m
 RESET  := \033[0m
 
-## —— INSEE City API Makefile ——————————————————————————————————————————————————
+## —— World Cities API Makefile ——————————————————————————————————————————————————
 
 help: ## Show this help
 	@echo ""
-	@echo "$(CYAN)INSEE City API$(RESET) - Available commands:"
+	@echo "$(CYAN)World Cities API$(RESET) - Available commands:"
 	@echo ""
 	@grep -E '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-20s$(RESET) %s\n", $$1, $$2}' | sed -e 's/## //'
 	@echo ""
@@ -157,9 +157,9 @@ routes: ## List all routes
 console: ## Run Symfony console command (usage: make console CMD="cache:clear")
 	docker compose exec app php bin/console $(CMD)
 
-## —— INSEE Import ————————————————————————————————————————————————————————————
+## —— City Import —————————————————————————————————————————————————————————————
 
-import: ## Run INSEE city import command
+import: ## Run the city import command (every tagged data provider)
 	symfony php -d memory_limit=512M bin/console app:import-cities
 
 ## —— API Platform ————————————————————————————————————————————————————————————
@@ -170,6 +170,6 @@ api-docs: ## Open API documentation
 ## —— Project Setup ———————————————————————————————————————————————————————————
 
 install: build up composer-install grumphp-init db-migrate ## Full project setup
-	@echo "$(GREEN)INSEE City API is ready!$(RESET)"
+	@echo "$(GREEN)World Cities API is ready!$(RESET)"
 	@echo "Backend API at: $(CYAN)http://localhost:8001$(RESET)"
 	@echo "API documentation at: $(CYAN)http://localhost:8001/api$(RESET)"

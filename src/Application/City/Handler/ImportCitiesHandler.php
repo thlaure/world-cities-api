@@ -12,25 +12,29 @@ final readonly class ImportCitiesHandler
 {
     private const int FLUSH_BATCH_SIZE = 50;
 
+    /**
+     * @param iterable<CityDataProviderInterface> $dataProviders
+     */
     public function __construct(
-        private CityDataProviderInterface $dataProvider,
+        private iterable $dataProviders,
         private CityRepositoryInterface $cityRepository,
     ) {
     }
 
     public function __invoke(): ImportResultDTO
     {
-        $cities = $this->dataProvider->fetchAllCities();
         $created = 0;
         $updated = 0;
         $batchCount = 0;
 
-        foreach ($cities as $city) {
-            $isNew = $this->cityRepository->save($city);
-            $isNew ? ++$created : ++$updated;
+        foreach ($this->dataProviders as $dataProvider) {
+            foreach ($dataProvider->fetchAllCities() as $city) {
+                $isNew = $this->cityRepository->save($city);
+                $isNew ? ++$created : ++$updated;
 
-            if (0 === ++$batchCount % self::FLUSH_BATCH_SIZE) {
-                $this->cityRepository->flush();
+                if (0 === ++$batchCount % self::FLUSH_BATCH_SIZE) {
+                    $this->cityRepository->flush();
+                }
             }
         }
 
