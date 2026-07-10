@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Infrastructure\External;
 
 use App\Domain\City\Exception\CityDataProviderException;
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use App\Infrastructure\External\GeoApiClient;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;

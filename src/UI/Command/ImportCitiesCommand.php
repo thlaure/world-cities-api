@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:import-cities',
-    description: 'Import all French communes from geo.api.gouv.fr into the database.',
+    description: 'Import cities from every configured data provider into the database.',
 )]
 final class ImportCitiesCommand extends Command
 {
@@ -27,7 +27,7 @@ final class ImportCitiesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('Importing French communes...');
+        $io->title('Importing cities...');
 
         try {
             $result = ($this->importCitiesHandler)();

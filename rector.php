@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodeQuality\Rector\Catch_\ThrowWithPreviousExceptionRector;
 use Rector\Config\RectorConfig;
 use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
@@ -23,6 +24,13 @@ return RectorConfig::configure()
         __DIR__.'/config/reference.php',
         // Skip Override attribute for PHP 8.5 compatibility
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        // Deliberately don't forward the caught exception's message into
+        // AddressSearchUnavailableException — it implements ProblemExceptionInterface
+        // with a fixed, safe "detail", and forwarding $previous->getMessage() into the
+        // constructor risks leaking internal provider errors to API clients.
+        ThrowWithPreviousExceptionRector::class => [
+            __DIR__.'/src/Infrastructure/Http/Provider/AddressSearchProvider.php',
+        ],
     ])
     ->withPhpSets(php85: true)
     ->withPreparedSets(

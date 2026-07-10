@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Domain\City\Handler;
 use App\Application\City\Handler\ImportCitiesHandler;
 use App\Domain\City\Exception\CityDataProviderException;
 use App\Domain\City\Model\City;
-use App\Domain\City\Model\CountryCode;
 use App\Domain\City\Port\CityDataProviderInterface;
 use App\Domain\City\Port\CityRepositoryInterface;
+use App\Domain\Shared\Model\CountryCode;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -25,7 +25,7 @@ final class ImportCitiesHandlerTest extends TestCase
     {
         $this->dataProvider = $this->createMock(CityDataProviderInterface::class);
         $this->cityRepository = $this->createMock(CityRepositoryInterface::class);
-        $this->handler = new ImportCitiesHandler($this->dataProvider, $this->cityRepository);
+        $this->handler = new ImportCitiesHandler([$this->dataProvider], $this->cityRepository);
     }
 
     public function testInvokeWithEmptyDataReturnsZeroTotals(): void
@@ -121,15 +121,47 @@ final class ImportCitiesHandlerTest extends TestCase
         ($this->handler)();
     }
 
+    public function testInvokeAggregatesAcrossMultipleProviders(): void
+    {
+        $franceProvider = $this->createMock(CityDataProviderInterface::class);
+        $franceProvider->expects($this->once())
+            ->method('fetchAllCities')
+            ->willReturn([$this->makeCity('75056', 'Paris', '75', '11', '75001')]);
+
+        $germanyProvider = $this->createMock(CityDataProviderInterface::class);
+        $germanyProvider->expects($this->once())
+            ->method('fetchAllCities')
+            ->willReturn([
+                $this->makeCity('2911298', 'Berlin', null, '16', null, CountryCode::DE),
+                $this->makeCity('2867714', 'Munich', null, '02', null, CountryCode::DE),
+            ]);
+
+        $cityRepository = $this->createMock(CityRepositoryInterface::class);
+        $cityRepository->expects($this->exactly(3))
+            ->method('save')
+            ->willReturn(true);
+        $cityRepository->expects($this->once())
+            ->method('flush');
+
+        $handler = new ImportCitiesHandler([$franceProvider, $germanyProvider], $cityRepository);
+
+        $result = $handler();
+
+        $this->assertSame(3, $result->created);
+        $this->assertSame(0, $result->updated);
+        $this->assertSame(3, $result->totalProcessed);
+    }
+
     private function makeCity(
         string $localCode,
         string $name,
-        string $departmentCode,
-        string $regionCode,
-        string $postalCode,
+        ?string $departmentCode,
+        ?string $regionCode,
+        ?string $postalCode,
+        CountryCode $countryCode = CountryCode::FR,
     ): City {
         return new City(
-            countryCode: CountryCode::FR,
+            countryCode: $countryCode,
             localCode: $localCode,
             name: $name,
             departmentCode: $departmentCode,

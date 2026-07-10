@@ -18,3 +18,4 @@ paths:
 - Optimize first for readability and reviewability.
 - If there is no measured performance issue, prefer the simpler and more readable solution.
 - The final code should be easy for a human reviewer to understand quickly.
+- Cross-cutting value objects shared by more than one bounded context (e.g. `CountryCode`) live in `src/Domain/Shared/`, not duplicated per-context.

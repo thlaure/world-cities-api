@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Domain\City\Model;
 
 use App\Domain\City\Model\City;
-use App\Domain\City\Model\CountryCode;
+use App\Domain\Shared\Model\CountryCode;
 use PHPUnit\Framework\TestCase;
 
 final class CityTest extends TestCase

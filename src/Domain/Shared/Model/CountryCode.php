@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\City\Model;
+namespace App\Domain\Shared\Model;
 
 enum CountryCode: string
 {

@@ -111,6 +111,13 @@ Feature: City API
     Then the response status code should be 200
     And the response header "X-Request-Id" should equal "test-request-id-123"
 
+  Scenario: GET /api/v1/cities sanitizes an unsafe X-Request-Id
+    Given there are no cities in the database
+    When I send a "GET" request to "/api/v1/cities" with headers:
+      | X-Request-Id | abc<script>123 |
+    Then the response status code should be 200
+    And the response header "X-Request-Id" should equal "abcscript123"
+
   Scenario: GET /api/v1/cities is rate limited
     Given there are no cities in the database
     When I send a "GET" request to "/api/v1/cities"

@@ -6,8 +6,8 @@ namespace App\Infrastructure\External;
 
 use App\Domain\City\Exception\CityDataProviderException;
 use App\Domain\City\Model\City;
-use App\Domain\City\Model\CountryCode;
 use App\Domain\City\Port\CityDataProviderInterface;
+use App\Domain\Shared\Model\CountryCode;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 

@@ -6,15 +6,15 @@ files. Don't restate rule-file content here.
 
 ## Project
 
-- Symfony/API Platform API for French city data. PHP 8.5, Symfony 7.4, API Platform 4.x, PostgreSQL, FrankenPHP.
-- Primary workflows: import commune data (write) and expose read-only city search/lookup (read).
+- Symfony/API Platform API for city data (any country, ISO 3166-1 alpha-2) and address autocomplete. PHP 8.5, Symfony 7.4, API Platform 4.x, PostgreSQL, FrankenPHP.
+- Primary workflows: import city data from multiple country-specific providers (write) and expose read-only city search/lookup plus address autocomplete (read).
 - Preserve API version prefix `/api/v1`.
 
 ## Architecture
 
 - `Application`: use-case orchestration. `Domain`: business models, domain exceptions, ports. `Infrastructure`: Doctrine/API clients/runtime adapters. `UI`: entrypoints (console commands, controllers).
 - Write flow stays layered and explicit: `UI Command → Application Handler → Domain Model → Domain Port → Infrastructure Adapter`.
-- Read flow is API Platform native: `API Platform → Provider → Doctrine ORM → App\Entity\City`. Read resources live in `src/UI/ApiResource/`, decoupled from the Doctrine entity; providers under `src/Infrastructure/Http/Provider/` map entities to resources. Prefer this Provider pattern over a custom controller for new read-only endpoints backed by Doctrine.
+- Read flow is API Platform native: City goes `API Platform → Provider → Doctrine ORM → App\Entity\City`; Address has no persistence — it's a live `API Platform → Provider → external HTTP call (Photon) → Address domain model` passthrough. Read resources live in `src/UI/ApiResource/`, decoupled from Doctrine; providers under `src/Infrastructure/Http/Provider/` map entities/domain models to resources. Prefer this Provider pattern over a custom controller for new read-only endpoints.
 - If API Platform already supports the required behavior cleanly, prefer the built-in feature over adding a custom layer.
 
 ## Always
@@ -60,7 +60,7 @@ Deep review agents: `.claude/agents/{qa,security}-reviewer.md`.
 
 ## API
 
-`GET /api/v1/cities` and `GET /api/v1/cities/{inseeCode}` — filters: `name` (partial), `exactName`, `departmentCode`, `regionCode` (exact). `postalCode` is `?string`, never `""`. Errors are RFC 7807 `application/problem+json`. Full reference (pagination, response shape, rate limiting, observability headers): `README.md`.
+`GET /api/v1/cities` and `GET /api/v1/cities/{countryCode}/{localCode}` — filters: `name` (partial), `exactName`, `countryCode`, `departmentCode`, `regionCode` (exact). `postalCode`/`departmentCode`/`regionCode` are `?string`, never `""`. `GET /api/v1/addresses/search` — `q` (required), `countryCode`, `limit` (1-20), plain JSON only. Errors are RFC 7807 `application/problem+json`. Full reference (pagination, response shape, rate limiting, observability headers): `README.md`.
 
 ## Verification
 

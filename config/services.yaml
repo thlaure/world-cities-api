@@ -25,9 +25,34 @@ services:
     App\Domain\City\Port\CityRepositoryInterface:
         alias: App\Infrastructure\Persistence\DoctrineCityRepository
 
-    App\Domain\City\Port\CityDataProviderInterface:
-        alias: App\Infrastructure\External\GeoApiClient
-
     App\Infrastructure\External\GeoApiClient:
         arguments:
             $baseUrl: '%env(INSEE_API_BASE_URL)%'
+        tags: [!php/const App\Domain\City\Port\CityDataProviderInterface::TAG]
+
+    # GeoNamesClient is reusable across any GeoNames-covered country (download.geonames.org) —
+    # only $countryCode differs between instances. Adding another country's cities via
+    # GeoNames means adding one more tagged instance below, not a new PHP class.
+    App\Infrastructure\External\GeoNamesClient:
+        abstract: true
+        arguments:
+            $baseUrl: '%env(GEONAMES_BASE_URL)%'
+
+    App\Infrastructure\External\GeoNamesClient.DE:
+        parent: App\Infrastructure\External\GeoNamesClient
+        arguments:
+            $countryCode: !php/enum App\Domain\Shared\Model\CountryCode::DE
+        tags: [!php/const App\Domain\City\Port\CityDataProviderInterface::TAG]
+
+    # If you rename CityDataProviderInterface::TAG, update this literal too —
+    # !tagged_iterator can't reference a PHP constant directly.
+    App\Application\City\Handler\ImportCitiesHandler:
+        arguments:
+            $dataProviders: !tagged_iterator app.city_data_provider
+
+    App\Domain\Address\Port\AddressProviderInterface:
+        alias: App\Infrastructure\External\PhotonClient
+
+    App\Infrastructure\External\PhotonClient:
+        arguments:
+            $baseUrl: '%env(PHOTON_BASE_URL)%'
