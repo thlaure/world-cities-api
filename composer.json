@@ -12,7 +12,7 @@
         "ext-pdo_pgsql": "*",
         "api-platform/doctrine-orm": "^4.3.16",
         "api-platform/symfony": "^4.3.15",
-        "doctrine/dbal": "^3.10",
+        "doctrine/dbal": "^4.4",
         "doctrine/doctrine-bundle": "^2.18.3",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6.7",
