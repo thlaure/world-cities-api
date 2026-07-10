@@ -9,10 +9,15 @@ doctrine:
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
+        enable_native_lazy_objects: true
         report_fields_where_declared: true
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         auto_mapping: true
+        controller_resolver:
+            # No controller in this app relies on route-placeholder-to-entity auto-mapping
+            # (HealthController has no params; API Platform resolves its own resources).
+            auto_mapping: false
         mappings:
             App:
                 type: attribute
