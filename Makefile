@@ -120,7 +120,7 @@ ci: db-test-create ## Run the local equivalent of the CI checks
 	docker compose exec -T app vendor/bin/php-cs-fixer fix --dry-run --diff
 	docker compose exec -T app vendor/bin/phpstan analyse
 	docker compose exec -T app vendor/bin/rector process --dry-run
-	docker compose exec -T app php bin/console lint:yaml config
+	docker compose exec -T app php bin/console lint:yaml config --parse-tags
 	docker compose exec -T app php bin/console -e test doctrine:schema:validate --skip-sync || true
 
 ## —— Database ————————————————————————————————————————————————————————————————

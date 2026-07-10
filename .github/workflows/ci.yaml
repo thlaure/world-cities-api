@@ -109,7 +109,7 @@ jobs:
         run: docker compose exec -T app vendor/bin/rector process --dry-run
 
       - name: YAML linter
-        run: docker compose exec -T app php bin/console lint:yaml config
+        run: docker compose exec -T app php bin/console lint:yaml config --parse-tags
 
       - name: Doctrine Schema Validator
         run: docker compose exec -T app php bin/console -e test doctrine:schema:validate --skip-sync || true
