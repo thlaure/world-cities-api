@@ -8,6 +8,7 @@ use App\Application\City\Handler\ImportCitiesHandler;
 use App\Domain\City\Exception\CityDataProviderException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressIndicator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -29,13 +30,27 @@ final class ImportCitiesCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Importing cities...');
 
+        $progressIndicator = new ProgressIndicator($output, format: 'verbose');
+        $progressIndicator->start('Starting import...');
+
         try {
-            $result = ($this->importCitiesHandler)();
+            $result = ($this->importCitiesHandler)(
+                onProviderStarted: function (string $providerLabel) use ($progressIndicator): void {
+                    $progressIndicator->setMessage(sprintf('Fetching from %s...', $providerLabel));
+                },
+                onCityImported: function (int $created, int $updated, int $totalProcessed) use ($progressIndicator): void {
+                    $progressIndicator->setMessage(sprintf('%d processed (%d created, %d updated)', $totalProcessed, $created, $updated));
+                    $progressIndicator->advance();
+                },
+            );
         } catch (CityDataProviderException $e) {
+            $progressIndicator->finish('Failed.');
             $io->error('Failed to fetch city data: '.$e->getMessage());
 
             return Command::FAILURE;
         }
+
+        $progressIndicator->finish('Done.');
 
         $io->success(sprintf(
             'Import complete. Created: %d | Updated: %d | Total processed: %d',
