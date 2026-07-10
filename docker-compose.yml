@@ -12,7 +12,10 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-    mem_limit: 512m
+    # No mem_limit here — dev-time CLI tooling (Rector, PHPStan, PHPUnit) runs inside
+    # this same container via `docker compose exec app ...` and needs headroom beyond
+    # what the FrankenPHP server itself uses. docker-compose.prod.yml sets a limit
+    # sized for serving traffic only, since prod never runs that tooling.
     environment:
       - APP_ENV=${APP_ENV:-dev}
       - APP_DEBUG=${APP_DEBUG:-1}
