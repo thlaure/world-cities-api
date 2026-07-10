@@ -10,6 +10,7 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+    mem_limit: 512m
     environment:
       - APP_ENV=prod
       - APP_DEBUG=0
