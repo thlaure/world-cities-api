@@ -41,6 +41,7 @@ return RectorConfig::configure()
         symfony: true,
         doctrine: true,
     )
+    ->withComposerBased(doctrine: true)
     ->withSets([
         SymfonySetList::SYMFONY_74,
         SymfonySetList::SYMFONY_CODE_QUALITY,
@@ -49,5 +50,4 @@ return RectorConfig::configure()
         SymfonySetList::CONFIGS,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
         PHPUnitSetList::PHPUNIT_100,
-        DoctrineSetList::DOCTRINE_ORM_300,
     ]);

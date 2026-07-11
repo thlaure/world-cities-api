@@ -11,12 +11,9 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\UuidV7;
 
-final class DoctrineCityRepository implements CityRepositoryInterface
+final readonly class DoctrineCityRepository implements CityRepositoryInterface
 {
-    /** @var array<string, true>|null */
-    private ?array $knownCityKeys = null;
-
-    private readonly Connection $connection;
+    private Connection $connection;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -26,11 +23,7 @@ final class DoctrineCityRepository implements CityRepositoryInterface
 
     public function save(DomainCity $city): bool
     {
-        $knownCityKeys = $this->getKnownCityKeys();
-        $cityKey = $this->buildCityKey($city->countryCode->value, $city->localCode);
-        $isNew = !isset($knownCityKeys[$cityKey]);
-
-        $this->connection->executeStatement(
+        $isNew = $this->connection->fetchOne(
             <<<'SQL'
                 INSERT INTO cities (id, country_code, local_code, name, department_code, region_code, postal_code, created_at, updated_at)
                 VALUES (:id, :country_code, :local_code, :name, :department_code, :region_code, :postal_code, :created_at, :updated_at)
@@ -40,6 +33,7 @@ final class DoctrineCityRepository implements CityRepositoryInterface
                     region_code = EXCLUDED.region_code,
                     postal_code = EXCLUDED.postal_code,
                     updated_at = EXCLUDED.updated_at
+                RETURNING CASE WHEN xmax = 0 THEN 1 ELSE 0 END
             SQL,
             [
                 'id' => (string) new UuidV7(),
@@ -65,39 +59,11 @@ final class DoctrineCityRepository implements CityRepositoryInterface
             ],
         );
 
-        if ($isNew) {
-            $this->knownCityKeys[$cityKey] = true;
+        if (!in_array($isNew, [0, 1, '0', '1'], true)) {
+            throw new \UnexpectedValueException('Unable to determine whether the city was created or updated.');
         }
 
-        return $isNew;
-    }
-
-    public function flush(): void
-    {
-    }
-
-    /**
-     * @return array<string, true>
-     */
-    private function getKnownCityKeys(): array
-    {
-        if (null !== $this->knownCityKeys) {
-            return $this->knownCityKeys;
-        }
-
-        /** @var list<array{country_code: string, local_code: string}> $rows */
-        $rows = $this->connection->fetchAllAssociative('SELECT country_code, local_code FROM cities');
-        $this->knownCityKeys = array_fill_keys(
-            array_map(fn (array $row): string => $this->buildCityKey($row['country_code'], $row['local_code']), $rows),
-            true,
-        );
-
-        return $this->knownCityKeys;
-    }
-
-    private function buildCityKey(string $countryCode, string $localCode): string
-    {
-        return sprintf('%s:%s', $countryCode, $localCode);
+        return 1 === $isNew || '1' === $isNew;
     }
 
     private function formatDateTime(\DateTimeInterface $dateTime): string

@@ -129,4 +129,19 @@ final class PhotonClientTest extends TestCase
 
         $client->searchAddresses('paris', null, 1);
     }
+
+    public function testSearchAddressesThrowsProviderExceptionWhenFeatureIsMalformed(): void
+    {
+        $response = json_encode([
+            'features' => [
+                ['properties' => ['name' => 'Paris']],
+            ],
+        ], \JSON_THROW_ON_ERROR);
+
+        $client = new PhotonClient(new MockHttpClient([new MockResponse($response)]), 'https://photon.example.test');
+
+        $this->expectException(AddressProviderException::class);
+
+        $client->searchAddresses('paris', null, 1);
+    }
 }

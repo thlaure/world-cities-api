@@ -40,19 +40,18 @@ final readonly class PhotonClient implements AddressProviderInterface
 
             /** @var array{features?: list<array<string, mixed>>} $data */
             $data = $response->toArray();
+            $addresses = [];
+            foreach ($data['features'] ?? [] as $index => $feature) {
+                $address = $this->mapFeature($feature, $index);
+
+                if ($countryCode instanceof CountryCode && $countryCode !== $address->countryCode) {
+                    continue;
+                }
+
+                $addresses[] = $address;
+            }
         } catch (\Throwable $e) {
             throw AddressProviderException::fromPrevious($e);
-        }
-
-        $addresses = [];
-        foreach ($data['features'] ?? [] as $index => $feature) {
-            $address = $this->mapFeature($feature, $index);
-
-            if ($countryCode instanceof CountryCode && $countryCode !== $address->countryCode) {
-                continue;
-            }
-
-            $addresses[] = $address;
         }
 
         return $addresses;

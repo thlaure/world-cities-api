@@ -16,3 +16,9 @@ services:
       - APP_DEBUG=0
       # Fails loudly instead of silently falling back to the base file's dev default.
       - APP_SECRET=${APP_SECRET:?APP_SECRET must be set for a production deployment}
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL must be set for a production deployment}
+      - SERVER_NAME=${SERVER_NAME:?SERVER_NAME must be set to the production hostname}
+
+  database:
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set for a production deployment}
