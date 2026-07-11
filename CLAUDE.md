@@ -67,6 +67,7 @@ Deep review agents: `.claude/agents/{qa,security}-reviewer.md`.
 
 `make lint` · `make analyse` · `make rector` · `make tests-unit` · `make tests-integration` · `make tests-api` · `make security`
 Preferred full pass: `make quality` · `make tests` · `make tests-api` · `make security`
+Right after verification passes, check whether `README.md` (or other docs) drifted from the change — commands, behavior, or tradeoffs described there that this session's diff made stale. Fix in the same session; don't defer doc drift.
 
 ## Pull Request Process
 

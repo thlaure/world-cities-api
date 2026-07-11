@@ -295,7 +295,7 @@ App\Infrastructure\External\GeoNamesClient.<CODE>:
     tags: ['app.city_data_provider']
 ```
 
-**Memory tradeoff**: unlike `GeoApiClient` (which deliberately fetches France department by department to avoid loading the full dataset at once), `GeoNamesClient` reads its target country's entire per-country file into memory in one pass. Fine for Germany (~82k populated places), but check `memory_limit` before adding a much larger country this way (e.g. the US) — this "no new class" config-only story doesn't come with a memory guard rail.
+**Memory**: `GeoNamesClient` streams the HTTP download straight to a temp file and reads the archived country file line by line — never loading the whole per-country file into memory as one string. Memory use stays low regardless of country size, so adding a much larger country this way (e.g. the US) doesn't need a `memory_limit` guard rail, unlike `GeoApiClient`, which fetches France department by department for the same reason (avoiding one large response).
 
 Useful links:
 - [GeoNames per-country dumps](https://download.geonames.org/export/dump/) — one `.zip` per ISO country code
@@ -381,7 +381,7 @@ make security      # Enlightn dependency vulnerability scan
 make tests-unit
 make tests-integration
 make tests-api     # Behat
-make tests         # all PHPUnit suites
+make tests         # all PHPUnit suites, testdox output + coverage report (var/coverage)
 
 # Database
 make db-migrate
