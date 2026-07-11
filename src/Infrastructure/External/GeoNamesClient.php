@@ -72,7 +72,7 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
         $path = tempnam(sys_get_temp_dir(), 'geonames_');
 
         if (false === $path) {
-            throw new \RuntimeException('Unable to create a temporary file for the GeoNames archive.');
+            throw new \RuntimeException('Unable to create a temporary file for the GeoNames archive.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
         }
 
         try {
