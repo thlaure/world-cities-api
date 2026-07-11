@@ -26,8 +26,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build Docker images
-        run: docker compose build --no-cache
+      - name: Build app image (dev) with layer cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/frankenphp/Dockerfile.dev
+          tags: insee-city-api-app:latest
+          load: true
+          cache-from: type=gha,scope=app-dev
+          cache-to: type=gha,mode=max,scope=app-dev
+
+      - name: Build photon image with layer cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/photon/Dockerfile
+          tags: insee-city-api-photon:latest
+          load: true
+          cache-from: type=gha,scope=photon
+          cache-to: type=gha,mode=max,scope=photon
 
       - name: Start services
         run: |
@@ -138,8 +155,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build prod image
-        run: docker build -f docker/frankenphp/Dockerfile -t world-cities-api:ci .
+      - name: Build prod image with layer cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/frankenphp/Dockerfile
+          tags: world-cities-api:ci
+          load: true
+          cache-from: type=gha,scope=prod
+          cache-to: type=gha,mode=max,scope=prod
 
       - name: Scan image for vulnerabilities
         uses: aquasecurity/trivy-action@v0.35.0

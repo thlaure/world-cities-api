@@ -28,6 +28,13 @@ ENV APP_ENV=prod
 ENV APP_DEBUG=0
 ENV SERVER_NAME=:80
 
+# Fetch and extract vendor packages first, cached independently of
+# application source changes as long as composer.json/composer.lock/
+# symfony.lock don't change. No autoloader yet: the full source tree
+# (needed for the classmap) isn't copied in until the next step.
+COPY composer.json composer.lock symfony.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-scripts --no-autoloader
+
 # Copy application
 COPY . .
 
@@ -35,7 +42,9 @@ COPY . .
 COPY docker/frankenphp/php.prod.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/frankenphp/Caddyfile.prod /etc/caddy/Caddyfile
 
-# Install dependencies and set permissions
+# Re-run install against the full source tree: packages are already
+# fetched (cached above), so this only builds the optimized autoloader,
+# then warm the cache and fix permissions.
 RUN export APP_SECRET=build-secret \
     DATABASE_URL='postgresql://insee:insee@localhost:5432/insee_city?serverVersion=16&charset=utf8' \
     && composer install --no-dev --prefer-dist --optimize-autoloader --classmap-authoritative --no-interaction --no-scripts \
