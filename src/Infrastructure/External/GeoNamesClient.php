@@ -79,7 +79,7 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
             $destination = fopen($path, 'wb');
 
             if (false === $destination) {
-                throw new \RuntimeException('Unable to open the GeoNames temporary file for writing.');
+                throw new \RuntimeException('Unable to open the GeoNames temporary file for writing.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
             }
 
             try {
@@ -88,7 +88,7 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
                     $writtenBytes = fwrite($destination, $contents);
 
                     if (false === $writtenBytes || strlen($contents) !== $writtenBytes) {
-                        throw new \RuntimeException('Unable to write the GeoNames archive to the temporary file.');
+                        throw new \RuntimeException('Unable to write the GeoNames archive to the temporary file.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
                     }
                 }
             } finally {
