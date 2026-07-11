@@ -25,7 +25,6 @@ final class DoctrineCityRepositoryTest extends DatabaseTestCase
         $city = $this->makeCity(CountryCode::FR, '75056', 'Paris', '75', '11');
 
         $isNew = $this->repository->save($city);
-        $this->repository->flush();
 
         $this->assertTrue($isNew);
         $entity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::FR, 'localCode' => '75056']);
@@ -37,11 +36,9 @@ final class DoctrineCityRepositoryTest extends DatabaseTestCase
     {
         $city = $this->makeCity(CountryCode::FR, '75056', 'Paris', '75', '11');
         $this->repository->save($city);
-        $this->repository->flush();
 
         $updated = $this->makeCity(CountryCode::FR, '75056', 'Paris Updated', '75', '11');
         $isNew = $this->repository->save($updated);
-        $this->repository->flush();
 
         $this->assertFalse($isNew);
         $entity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::FR, 'localCode' => '75056']);
@@ -52,7 +49,6 @@ final class DoctrineCityRepositoryTest extends DatabaseTestCase
     public function testSavePersistsPostalCode(): void
     {
         $this->repository->save($this->makeCity(CountryCode::FR, '75056', 'Paris', '75', '11', '75001'));
-        $this->repository->flush();
 
         $entity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::FR, 'localCode' => '75056']);
         $this->assertInstanceOf(CityEntity::class, $entity);
@@ -62,7 +58,6 @@ final class DoctrineCityRepositoryTest extends DatabaseTestCase
     public function testSavePersistsNullDepartmentAndRegionCodes(): void
     {
         $this->repository->save($this->makeCity(CountryCode::DE, '08111000', 'Stuttgart', null, null, '70173'));
-        $this->repository->flush();
 
         $entity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::DE, 'localCode' => '08111000']);
         $this->assertInstanceOf(CityEntity::class, $entity);
@@ -74,7 +69,6 @@ final class DoctrineCityRepositoryTest extends DatabaseTestCase
     {
         $this->repository->save($this->makeCity(CountryCode::FR, '75056', 'Paris', '75', '11'));
         $this->repository->save($this->makeCity(CountryCode::DE, '75056', 'Some German City', null, null));
-        $this->repository->flush();
 
         $frenchEntity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::FR, 'localCode' => '75056']);
         $germanEntity = $this->entityManager->getRepository(CityEntity::class)->findOneBy(['countryCode' => CountryCode::DE, 'localCode' => '75056']);

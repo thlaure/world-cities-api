@@ -34,9 +34,6 @@ final class ImportCitiesHandlerTest extends TestCase
             ->method('fetchAllCities')
             ->willReturn([]);
 
-        $this->cityRepository->expects($this->once())
-            ->method('flush');
-
         $result = ($this->handler)();
 
         $this->assertSame(0, $result->created);
@@ -87,29 +84,6 @@ final class ImportCitiesHandlerTest extends TestCase
         $this->assertSame(1, $result->totalProcessed);
     }
 
-    public function testInvokeFlushesEvery50Cities(): void
-    {
-        $cities = [];
-
-        for ($i = 0; $i < 100; ++$i) {
-            $cities[] = $this->makeCity(sprintf('75%03d', $i), sprintf('Paris %d', $i), '75', '11', '');
-        }
-
-        $this->dataProvider->expects($this->once())
-            ->method('fetchAllCities')
-            ->willReturn($cities);
-
-        $this->cityRepository->expects($this->any())
-            ->method('save')
-            ->willReturn(true);
-
-        // flush called at 50, 100, and final = 3 times
-        $this->cityRepository->expects($this->exactly(3))
-            ->method('flush');
-
-        ($this->handler)();
-    }
-
     public function testInvokeThrowsWhenDataProviderFails(): void
     {
         $this->dataProvider->expects($this->once())
@@ -140,9 +114,6 @@ final class ImportCitiesHandlerTest extends TestCase
         $cityRepository->expects($this->exactly(3))
             ->method('save')
             ->willReturn(true);
-        $cityRepository->expects($this->once())
-            ->method('flush');
-
         $handler = new ImportCitiesHandler([$franceProvider, $germanyProvider], $cityRepository);
 
         $result = $handler();

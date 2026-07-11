@@ -87,6 +87,26 @@ final class GeoNamesClientTest extends TestCase
         [...$client->fetchAllCities()];
     }
 
+    public function testFetchAllCitiesCleansUpTempFileWhenStreamingFailsMidBody(): void
+    {
+        $client = new GeoNamesClient(
+            new MockHttpClient([new MockResponse(['PK', new TransportException('connection dropped mid-stream')])]),
+            'https://geonames.example.test',
+            CountryCode::DE,
+        );
+
+        $tempFilesBefore = glob(sys_get_temp_dir().'/geonames_*');
+
+        try {
+            [...$client->fetchAllCities()];
+            $this->fail('Expected a CityDataProviderException to be thrown.');
+        } catch (CityDataProviderException) {
+            // Expected — swallowed so the cleanup assertion below can run.
+        }
+
+        $this->assertSame($tempFilesBefore, glob(sys_get_temp_dir().'/geonames_*'), 'A partially written GeoNames temp file must be cleaned up when streaming fails mid-body.');
+    }
+
     private function loadFixture(): string
     {
         $contents = file_get_contents(self::FIXTURE_PATH);

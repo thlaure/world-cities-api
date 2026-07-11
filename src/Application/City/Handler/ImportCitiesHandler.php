@@ -10,8 +10,6 @@ use App\Domain\City\Port\CityRepositoryInterface;
 
 final readonly class ImportCitiesHandler
 {
-    private const int FLUSH_BATCH_SIZE = 50;
-
     /**
      * @param iterable<CityDataProviderInterface> $dataProviders
      */
@@ -29,8 +27,6 @@ final readonly class ImportCitiesHandler
     {
         $created = 0;
         $updated = 0;
-        $batchCount = 0;
-
         foreach ($this->dataProviders as $dataProvider) {
             if (null !== $onProviderStarted) {
                 $onProviderStarted($this->resolveProviderLabel($dataProvider));
@@ -43,14 +39,8 @@ final readonly class ImportCitiesHandler
                 if (null !== $onCityImported) {
                     $onCityImported($created, $updated, $created + $updated);
                 }
-
-                if (0 === ++$batchCount % self::FLUSH_BATCH_SIZE) {
-                    $this->cityRepository->flush();
-                }
             }
         }
-
-        $this->cityRepository->flush();
 
         return new ImportResultDTO(
             created: $created,

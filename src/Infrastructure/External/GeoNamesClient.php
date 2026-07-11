@@ -10,6 +10,7 @@ use App\Domain\City\Port\CityDataProviderInterface;
 use App\Domain\Shared\Model\CountryCode;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * Imports cities from GeoNames (download.geonames.org), a free worldwide gazetteer
@@ -48,7 +49,7 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
 
         try {
             $response = $this->httpClient->request(Request::METHOD_GET, sprintf('%s/%s.zip', $this->baseUrl, $this->countryCode->value));
-            $archivePath = $this->writeToTempFile($response->getContent());
+            $archivePath = $this->writeResponseToTempFile($response);
 
             foreach ($this->readCountryFile($archivePath) as $index => $line) {
                 $city = $this->mapLine($line, $index);
@@ -66,15 +67,38 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
         }
     }
 
-    private function writeToTempFile(string $contents): string
+    private function writeResponseToTempFile(ResponseInterface $response): string
     {
         $path = tempnam(sys_get_temp_dir(), 'geonames_');
 
         if (false === $path) {
-            throw new \RuntimeException('Unable to create a temporary file for the GeoNames archive.');
+            throw new \RuntimeException('Unable to create a temporary file for the GeoNames archive.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
         }
 
-        file_put_contents($path, $contents);
+        try {
+            $destination = fopen($path, 'wb');
+
+            if (false === $destination) {
+                throw new \RuntimeException('Unable to open the GeoNames temporary file for writing.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
+            }
+
+            try {
+                foreach ($this->httpClient->stream($response) as $chunk) {
+                    $contents = $chunk->getContent();
+                    $writtenBytes = fwrite($destination, $contents);
+
+                    if (false === $writtenBytes || strlen($contents) !== $writtenBytes) {
+                        throw new \RuntimeException('Unable to write the GeoNames archive to the temporary file.'); // NOSONAR php:S112 - internal detail, wrapped into CityDataProviderException at the adapter boundary
+                    }
+                }
+            } finally {
+                fclose($destination);
+            }
+        } catch (\Throwable $e) {
+            unlink($path);
+
+            throw $e;
+        }
 
         return $path;
     }
@@ -90,20 +114,27 @@ final readonly class GeoNamesClient implements CityDataProviderInterface
             throw new \UnexpectedValueException(sprintf('Unable to open the GeoNames archive for country "%s".', $this->countryCode->value));
         }
 
-        try {
-            $contents = $archive->getFromName(sprintf('%s.txt', $this->countryCode->value));
+        $entryName = sprintf('%s.txt', $this->countryCode->value);
+        $countryFile = null;
 
-            if (false === $contents) {
+        try {
+            $countryFile = $archive->getStream($entryName);
+
+            if (false === $countryFile) {
                 throw new \UnexpectedValueException(sprintf('Archive for country "%s" does not contain the expected "%s.txt" entry.', $this->countryCode->value, $this->countryCode->value));
             }
-        } finally {
-            $archive->close();
-        }
 
-        foreach (explode("\n", $contents) as $line) {
-            if ('' !== trim($line)) {
-                yield $line;
+            while (false !== $line = fgets($countryFile)) {
+                if ('' !== trim($line)) {
+                    yield rtrim($line, "\r\n");
+                }
             }
+        } finally {
+            if (false !== $countryFile && null !== $countryFile) {
+                fclose($countryFile);
+            }
+
+            $archive->close();
         }
     }
 

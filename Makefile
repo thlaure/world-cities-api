@@ -121,12 +121,12 @@ ci: db-test-create ## Run the local equivalent of the CI checks
 	docker compose exec -T app vendor/bin/phpstan analyse
 	docker compose exec -T app vendor/bin/rector process --dry-run
 	docker compose exec -T app php bin/console lint:yaml config --parse-tags
-	docker compose exec -T app php bin/console -e test doctrine:schema:validate --skip-sync || true
+	docker compose exec -T app php bin/console -e test doctrine:schema:validate --skip-sync
 
 ## —— Database ————————————————————————————————————————————————————————————————
 
 db-migrate: ## Run database migrations
-	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction || true
+	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
 
 db-diff: ## Generate migration from entity changes
 	docker compose exec app php bin/console doctrine:migrations:diff

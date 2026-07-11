@@ -12,9 +12,4 @@ interface CityRepositoryInterface
      * Persist a city. Returns true if created, false if updated.
      */
     public function save(City $city): bool;
-
-    /**
-     * Flush pending changes to the database.
-     */
-    public function flush(): void;
 }

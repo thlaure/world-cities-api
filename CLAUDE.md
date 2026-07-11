@@ -1,8 +1,9 @@
-# Claude Guide
+# Repository Agent Guide
 
-Canonical agent instructions. Always-loaded core only — detailed, path-scoped
-rules live in `.claude/rules/*` and load automatically when you edit matching
-files. Don't restate rule-file content here.
+Canonical project instructions shared by Claude Code and local Codex adapters.
+Claude loads the detailed, path-scoped rules in `.claude/rules/*`
+automatically. Codex workflows read those same files when relevant. Don't
+restate rule-file content here.
 
 ## Project
 
